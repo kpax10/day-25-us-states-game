@@ -10,23 +10,27 @@ screen.setup(725, 491)
 turtle.shape(image)
 
 data = pandas.read_csv("50_states.csv")
+all_states = data.state.to_list()
+guessed_states = []
 
-answer_state = screen.textinput(title="What's another state's name?", prompt="").title()
-matching_row = data[data.state == answer_state]
-# print(matching_row['x'], matching_row['y'])
-print(matching_row['state'])
+while len(guessed_states) < 50:
+    answer_state = screen.textinput(title=f"{len(guessed_states)}/50 States Correct",
+                                    prompt="What's another state's name?").title()
 
-if not matching_row.empty:
-    new_turtle = Turtle()
-    new_turtle.penup()
-    new_turtle.hideturtle()
-    state_name = matching_row['state'].iloc[0]
-    state_x = int(matching_row['x'].iloc[0])
-    state_y = int(matching_row['y'].iloc[0])
+    if answer_state == "Exit":
+        states_to_learn = []
+        for state in all_states:
+            if state not in guessed_states:
+                states_to_learn.append(state)
+        df = pandas.DataFrame(states_to_learn)
+        df.to_csv("states_to_learn.csv", header=['State'])
+        break
 
-    new_turtle.goto(state_x, state_y)
-    new_turtle.write(state_name)
-
-
-
-screen.exitonclick()
+    if answer_state in all_states:
+        guessed_states.append(answer_state)
+        t = Turtle()
+        t.hideturtle()
+        t.penup()
+        state_data = data[data.state == answer_state]
+        t.goto(state_data.x.item(), state_data.y.item())
+        t.write(answer_state)
